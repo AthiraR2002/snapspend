@@ -44,20 +44,6 @@ Managing daily expenses can be time-consuming, especially when entering data man
 
 * Google Gemini API
 
----
-
-## 📂 Project Structure
-
-```text
-snapspend/
-│── app.py
-│── create_db.py
-│── gemini_test.py
-│── snapspend.db
-│── templates/
-│── static/
-└── README.md
-```
 
 ---
 
