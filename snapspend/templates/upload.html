@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Receipt Scanner | SnapSpend</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+        /* Dropzone container */
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 18px;
+            padding: 45px 24px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 24px;
+        }
+        
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.05);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.12),
+                        0 0 0 4px rgba(139, 92, 246, 0.15);
+        }
+        
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .drop-zone-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+        }
+        
+        .upload-icon {
+            color: #8b5cf6;
+            transition: transform 0.3s ease;
+        }
+        
+        .drop-zone:hover .upload-icon {
+            transform: translateY(-6px) scale(1.05);
+        }
+        
+        .drop-zone-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+        
+        .browse-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .drop-zone-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* File preview pill */
+        .file-preview-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ffffff;
+            margin-bottom: 24px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* Features/Info List */
+        .ai-features-box {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        
+        .ai-feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .ai-feature-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .ai-feature-item svg {
+            color: #10b981;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container" style="max-width: 500px;">
+        <div class="auth-card">
+            <!-- Branding -->
+            <a href="/" class="auth-logo">
+                <div class="auth-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <span class="auth-logo-text">SnapSpend</span>
+            </a>
+
+            <h1 class="auth-title">AI Receipt Scanner</h1>
+            <p class="auth-subtitle">Scan your paper or digital bills to log expenses instantly</p>
+
+            <!-- Form -->
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="auth-form">
+                
+                <!-- Drag & Drop Zone -->
+                <div class="drop-zone" id="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span class="drop-zone-text">Drag & drop your receipt or <span class="browse-link">browse</span></span>
+                        <span class="drop-zone-sub">Supports JPG, JPEG, PNG formats</span>
+                    </div>
+                    <input type="file" name="receipt" id="file-input" class="file-input" accept="image/*" required>
+                </div>
+
+                <!-- Selection preview (JS populated) -->
+                <div id="file-preview-wrapper" style="text-align: center; display: none;">
+                    <div class="file-preview-pill">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span id="selected-file-name">receipt.png</span>
+                    </div>
+                </div>
+
+                <!-- AI Extraction Notice -->
+                <div class="ai-features-box">
+                    <div class="ai-feature-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Extracts store name, total cost, and receipt date automatically.</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>AI-Powered classification maps items to correct budget category.</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="auth-btn">
+                    <span>Scan & Log Receipt</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer" style="margin-top: 25px;">
+                <a href="/" class="auth-link" style="font-size: 14px; color: var(--text-secondary);">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drag & Drop Event Handling -->
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewWrapper = document.getElementById('file-preview-wrapper');
+        const fileNameSpan = document.getElementById('selected-file-name');
+
+        // Handle file change
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileNameSpan.textContent = fileInput.files[0].name;
+                previewWrapper.style.display = 'block';
+            } else {
+                previewWrapper.style.display = 'none';
+            }
+        });
+
+        // Add visual cues for dragging files over the zone
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+            }, false);
+        });
+    </script>
+</body>
+</html>

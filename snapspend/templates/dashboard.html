@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Dashboard | SnapSpend</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-color: #0b0c10;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* Animated gradient background blobs */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.22;
+            animation: float 15s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            background: var(--accent-blue);
+            top: 5%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        body::after {
+            background: var(--accent-purple);
+            bottom: 5%;
+            right: 10%;
+            animation-delay: -7.5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(80px, 50px) scale(1.2); }
+        }
+
+        .container-xl {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header Navigation */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-back {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            transform: translateX(-3px);
+        }
+
+        /* Metric Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .icon-spending {
+            background: rgba(139, 92, 246, 0.12);
+            color: #c084fc;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .icon-budget {
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .icon-savings {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .icon-goal {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .stat-info {
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .card-setting-link {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .card-setting-link:hover {
+            color: #ffffff;
+            opacity: 1;
+        }
+
+        /* Layout Cards */
+        .dash-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: 100%;
+        }
+
+        .dash-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: left;
+            border-left: 4px solid #8b5cf6;
+            padding-left: 12px;
+            letter-spacing: -0.2px;
+        }
+
+        /* Custom Table */
+        .custom-table-container {
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+            color: #ffffff;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .table-custom th {
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 16px;
+            text-align: left;
+        }
+
+        .table-custom td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 14.5px;
+            text-align: left;
+            background: transparent;
+            color: #ffffff;
+        }
+
+        .table-custom tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-custom tr {
+            transition: background 0.2s ease;
+        }
+
+        .table-custom tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .cat-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .badge-Food { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .badge-Grocery { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+        .badge-Travel { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); }
+        .badge-Shopping { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.25); }
+        .badge-Medical { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); }
+        .badge-Entertainment { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.25); }
+        .badge-Utilities { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.25); }
+        .badge-Other { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.25); }
+
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        /* Insight bullet list */
+        .insight-list {
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+            margin-bottom: 0;
+        }
+
+        .insight-item {
+            position: relative;
+            padding-left: 28px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-item svg {
+            position: absolute;
+            left: 0;
+            top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-xl">
+        <!-- Header -->
+        <header class="dash-header">
+            <a href="/" class="brand-logo">
+                <div class="brand-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <span>SnapSpend</span>
+            </a>
+            <a href="/" class="btn-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Back to Home</span>
+            </a>
+        </header>
+
+        <!-- Notification Alerts Area -->
+        {% if alert or comparison_alert or food_alert %}
+            <div class="mb-4">
+                {% if alert %}
+                    <div class="alert alert-danger d-flex align-items-center gap-3 border-0 shadow-sm" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border-radius: 14px; border: 1px solid rgba(239, 68, 68, 0.2) !important; padding: 14px 20px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span class="fw-semibold">{{ alert }}</span>
+                    </div>
+                {% endif %}
+                {% if comparison_alert %}
+                    <div class="alert alert-warning d-flex align-items-center gap-3 border-0 shadow-sm mt-3" style="background: rgba(245, 158, 11, 0.12); color: #fbbf24; border-radius: 14px; border: 1px solid rgba(245, 158, 11, 0.2) !important; padding: 14px 20px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span class="fw-semibold">{{ comparison_alert }}</span>
+                    </div>
+                {% endif %}
+                {% if food_alert %}
+                    <div class="alert alert-danger d-flex align-items-center gap-3 border-0 shadow-sm mt-3" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border-radius: 14px; border: 1px solid rgba(239, 68, 68, 0.2) !important; padding: 14px 20px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span class="fw-semibold">{{ food_alert }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Metrics Cards -->
+        <div class="stats-grid">
+            <!-- Total Spending -->
+            <div class="stat-card">
+                <div class="stat-icon icon-spending">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Total Spending</div>
+                    <div class="stat-value value-spending">₹{{ "%.2f"|format(total_expense) if total_expense else "0.00" }}</div>
+                </div>
+            </div>
+            
+            <!-- Monthly Budget -->
+            <div class="stat-card">
+                <a href="/set_budget" class="card-setting-link" title="Set Monthly Budget">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </a>
+                <div class="stat-icon icon-budget">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Monthly Budget</div>
+                    <div class="stat-value value-expenses">₹{{ "%.2f"|format(monthly_budget) if monthly_budget else "0.00" }}</div>
+                </div>
+            </div>
+
+            <!-- Remaining Budget -->
+            <div class="stat-card">
+                <div class="stat-icon icon-savings" style="background: {{ 'rgba(16, 185, 129, 0.12)' if current_savings >= 0 else 'rgba(239, 68, 68, 0.12)' }}; color: {{ '#34d399' if current_savings >= 0 else '#f87171' }}; border-color: {{ 'rgba(16, 185, 129, 0.2)' if current_savings >= 0 else 'rgba(239, 68, 68, 0.2)' }};">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        {% if current_savings >= 0 %}
+                            <polyline points="12 16 12 8 8 12 12 8 16 12"></polyline>
+                        {% else %}
+                            <polyline points="12 8 12 16 8 12 12 16 16 12"></polyline>
+                        {% endif %}
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label">Remaining Budget</div>
+                    <div class="stat-value" style="color: {{ '#34d399' if current_savings >= 0 else '#f87171' }} !important;">₹{{ "%.2f"|format(current_savings) }}</div>
+                </div>
+            </div>
+
+            <!-- Active savings goal -->
+            <div class="stat-card">
+                <a href="/set_goal" class="card-setting-link" title="Set Savings Goal">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </a>
+                <div class="stat-icon icon-goal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="{{ goal_name if goal_name else 'Goal (Not Set)' }}">Goal: {{ goal_name if goal_name else "Not Set" }}</div>
+                    <div class="stat-value value-goal" style="color: #fbbf24 !important;">₹{{ "%.2f"|format(target_amount) if target_amount else "0.00" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget & Goal Progress Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Budget Utilization -->
+            {% if monthly_budget > 0 %}
+            <div class="col-md-6 col-12">
+                <div class="dash-card" style="padding: 24px 30px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold" style="font-size: 15px; color: var(--text-secondary);">Budget Utilization</span>
+                        <span class="fw-bold" style="color: {{ '#f87171' if (total_expense/monthly_budget)*100 >= 100 else '#34d399' }}">{{ ((total_expense/monthly_budget)*100)|round(1) }}% Used</span>
+                    </div>
+                    <div class="custom-progress-container">
+                        <div class="progress-bar-custom" style="width: {{ (total_expense/monthly_budget)*100 if (total_expense/monthly_budget)*100 <= 100 else 100 }}%; background: {{ 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)' if (total_expense/monthly_budget)*100 >= 100 else 'var(--accent-gradient)' }};"></div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Savings Goal Progress -->
+            {% if target_amount > 0 %}
+            <div class="col-md-6 col-12">
+                <div class="dash-card" style="padding: 24px 30px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold" style="font-size: 15px; color: var(--text-secondary);">Goal Progress (Savings)</span>
+                        <span class="fw-bold" style="color: #60a5fa">{{ goal_progress }}% Saved</span>
+                    </div>
+                    <div class="custom-progress-container">
+                        <div class="progress-bar-custom" style="width: {{ goal_progress }}%; background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);"></div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Middle Row: Expense Trend Card (Line Chart) -->
+        <div class="dash-card mb-4">
+            <h3 class="dash-card-title">Expense Trend Analysis</h3>
+            {% if trend_labels %}
+                <div class="chart-wrapper" style="height: 320px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            {% else %}
+                <p class="text-secondary text-center py-5">No historical trend data available. Add expenses across different months to see spending timelines.</p>
+            {% endif %}
+        </div>
+
+        <!-- Twin Column Layout for Table & Doughnut Chart -->
+        <div class="row g-4 mb-4">
+            <!-- Table (Spending Habit Analysis) -->
+            <div class="col-lg-7 col-12">
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Spending Habits</h3>
+                    {% if category_percentages %}
+                        <div class="custom-table-container">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Total Spent</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in category_percentages %}
+                                    <tr>
+                                        <td><span class="cat-badge badge-{{ item.category }}">{{ item.category }}</span></td>
+                                        <td class="fw-bold text-white">₹{{ "%.2f"|format(item.amount) }}</td>
+                                        <td style="color: var(--text-secondary); font-weight: 500;">{{ item.percentage }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-secondary text-center py-5">No category logs recorded yet.</p>
+                    {% endif %}
+
+                    <!-- Top Spending Habit Insight -->
+                    {% if top_category %}
+                    <div class="alert alert-dark border-0 mt-3 d-flex align-items-center gap-3" style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15) !important; border-radius: 14px; margin-bottom: 0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <div style="font-size: 13.5px; color: #cbd5e1; text-align: left; line-height: 1.5;">
+                            Insight: Most of your money is spent on <strong style="color: #ffffff;">{{ top_category.category }}</strong>, which represents <strong style="color: #ffffff;">{{ top_category.percentage }}%</strong> of your total monthly expense logs.
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Doughnut Chart -->
+            <div class="col-lg-5 col-12">
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Spending Structure</h3>
+                    {% if category_percentages %}
+                        <div class="chart-wrapper">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    {% else %}
+                        <p class="text-secondary text-center py-5">No chart data available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Weekly Heatmap and Insights -->
+        <div class="row g-4">
+            <!-- Weekly Heatmap Chart -->
+            <div class="col-lg-7 col-12">
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Weekly Spending Heatmap</h3>
+                    <div class="chart-wrapper" style="height: 300px;">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spending Insights & Predictions -->
+            <div class="col-lg-5 col-12">
+                <div class="dash-card" style="text-align: left;">
+                    <h3 class="dash-card-title">Insights & Predictions</h3>
+                    <ul class="insight-list">
+                        {% if day_insight %}
+                        <li class="insight-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 8v4l3 3"></path>
+                            </svg>
+                            <strong>Timeline Insight</strong><br>
+                            {{ day_insight }}
+                        </li>
+                        {% endif %}
+                        
+                        {% if top_category %}
+                        <li class="insight-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            <strong>Category Highlight</strong><br>
+                            Most of your monthly budget goes to <span class="fw-semibold text-white">{{ top_category.category }}</span> (₹{{ "%.2f"|format(top_category.amount) }}).
+                        </li>
+                        {% endif %}
+
+                        {% if monthly_budget > 0 %}
+                        <li class="insight-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                                <line x1="12" y1="4" x2="12" y2="20"></line>
+                            </svg>
+                            <strong>Budget Status</strong><br>
+                            You have used {{ ((total_expense/monthly_budget)*100)|round(1) }}% of your total ₹{{ "%.2f"|format(monthly_budget) }} spending limit.
+                        </li>
+                        {% endif %}
+
+                        {% if target_amount > 0 %}
+                        <li class="insight-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <strong>Savings Target</strong><br>
+                            You are {{ goal_progress }}% of the way to achieving your savings goal of <span class="fw-semibold text-white">{{ goal_name }}</span> (₹{{ "%.2f"|format(target_amount) }}).
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {% if category_percentages %}
+            // 1. Doughnut Chart Configuration
+            const ctx = document.getElementById('expenseChart');
+            const borderColors = [
+                '#3b82f6', // blue
+                '#8b5cf6', // purple
+                '#10b981', // green/teal
+                '#ef4444', // red/coral
+                '#f59e0b', // amber
+                '#ec4899', // pink
+                '#06b6d4', // cyan
+                '#6366f1'  // indigo
+            ];
+            
+            const backgroundColors = borderColors.map(color => color + 'b3'); // Add transparency (70% opacity)
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ labels | tojson }},
+                    datasets: [{
+                        data: {{ amounts | tojson }},
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                padding: 16,
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
+                                    size: 12,
+                                    weight: 500
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            bodyFont: {
+                                family: "'Plus Jakarta Sans', sans-serif",
+                                size: 13
+                            },
+                            titleFont: {
+                                family: "'Plus Jakarta Sans', sans-serif",
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += '₹' + context.parsed.toFixed(2);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '68%',
+                }
+            });
+            {% endif %}
+
+            {% if trend_labels %}
+            // 2. Line Chart Configuration (Spending Trend)
+            const trendCtx = document.getElementById('trendChart');
+            const trendGradient = trendCtx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+            trendGradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
+            trendGradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
+
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ trend_labels | tojson }},
+                    datasets: [{
+                        label: 'Monthly Spending',
+                        data: {{ trend_amounts | tojson }},
+                        borderColor: '#8b5cf6',
+                        borderWidth: 3,
+                        backgroundColor: trendGradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
+                                    size: 11
+                                },
+                                callbacks: {
+                                    label: function(value) {
+                                        return '₹' + value;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            bodyFont: {
+                                family: "'Plus Jakarta Sans', sans-serif",
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Spending: ₹' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            {% endif %}
+
+            // 3. Weekly Bar Chart Configuration (Day of Week spending heatmap)
+            const weeklyCtx = document.getElementById('weeklyChart');
+            const barGradient = weeklyCtx.getContext('2d').createLinearGradient(0, 0, 300, 0);
+            barGradient.addColorStop(0, 'rgba(59, 130, 246, 0.7)'); // blue
+            barGradient.addColorStop(1, 'rgba(6, 182, 212, 0.7)');  // cyan
+            
+            const barBorderColors = ['#3b82f6', '#3b82f6', '#3b82f6', '#3b82f6', '#3b82f6', '#06b6d4', '#06b6d4'];
+
+            new Chart(weeklyCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ weekday_labels | tojson }},
+                    datasets: [{
+                        label: 'Spending',
+                        data: {{ weekday_amounts | tojson }},
+                        backgroundColor: barGradient,
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Renders horizontal bar chart
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
+                                    size: 11
+                                },
+                                callbacks: {
+                                    label: function(value) {
+                                        return '₹' + value;
+                                    }
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: "'Plus Jakarta Sans', sans-serif",
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            bodyFont: {
+                                family: "'Plus Jakarta Sans', sans-serif",
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Spent: ₹' + context.parsed.x.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

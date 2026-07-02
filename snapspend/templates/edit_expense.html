@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Expense | SnapSpend</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+        /* Dropdown Arrow Custom styling for select fields */
+        select.auth-input {
+            cursor: pointer;
+            padding-right: 40px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        select.auth-input option {
+            background-color: #0b0c10;
+            color: #ffffff;
+        }
+        /* Custom adjustment for HTML5 calendar picker icon */
+        input[type="date"].auth-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container" style="max-width: 500px;">
+        <div class="auth-card">
+            <!-- Branding -->
+            <a href="/" class="auth-logo">
+                <div class="auth-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <span class="auth-logo-text">SnapSpend</span>
+            </a>
+
+            <h1 class="auth-title">Edit Expense</h1>
+            <p class="auth-subtitle">Modify transaction details for this record</p>
+
+            <!-- Form -->
+            <form action="/update/{{ expense[0] }}" method="POST" class="auth-form">
+                
+                <!-- Amount -->
+                <div class="form-group">
+                    <label for="amount" class="form-label">Amount (₹)</label>
+                    <div class="input-wrapper">
+                        <input type="number" step="0.01" min="0" id="amount" name="amount" class="auth-input" value="{{ expense[1] }}" required>
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="category" class="form-label">Category</label>
+                    <div class="input-wrapper">
+                        <select id="category" name="category" class="auth-input" required>
+                            <option value="" disabled>Select Category</option>
+                            {% for cat in ["Food", "Grocery", "Travel", "Shopping", "Medical", "Entertainment", "Utilities", "Other"] %}
+                                <option value="{{ cat }}" {% if expense[2] == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description" class="form-label">Description / Merchant</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="description" name="description" class="auth-input" value="{{ expense[3] }}" required>
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label for="date" class="form-label">Transaction Date</label>
+                    <div class="input-wrapper">
+                        <input type="date" id="date" name="date" class="auth-input" value="{{ expense[4] }}" required>
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="auth-btn">
+                    <span>Save Changes</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer" style="margin-top: 25px;">
+                <a href="/expenses" class="auth-link" style="font-size: 14px; color: var(--text-secondary);">← Cancel & Back to List</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

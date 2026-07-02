@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Home | SnapSpend</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-color: #0b0c10;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        /* Animated gradient background blobs */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+            animation: float 12s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            background: var(--accent-blue);
+            top: 10%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        body::after {
+            background: var(--accent-purple);
+            bottom: 10%;
+            right: 15%;
+            animation-delay: -6s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.15); }
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+            padding: 50px 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            max-width: 620px;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--accent-gradient);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.35);
+            margin-bottom: 24px;
+        }
+
+        .btn-gradient {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+            color: white;
+            filter: brightness(1.05);
+        }
+
+        .btn-outline-custom {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-custom:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        @media (max-width: 576px) {
+            .nav-links {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-card {
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 18px;
+            padding: 20px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(139, 92, 246, 0.05);
+            color: #ffffff;
+        }
+
+        .feature-card svg {
+            color: #8b5cf6;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover svg {
+            transform: scale(1.1);
+        }
+
+        .feature-card strong {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .toast-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        
+        .alert-custom {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            border-radius: 12px;
+            font-size: 14px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top-Right Notifications (Flask Flash Messages) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="toast-container">
+                {% for category, message in messages %}
+                    <div class="alert-custom">
+                        {% if category == 'success' %}
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        {% else %}
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="main-card">
+        <!-- Logo -->
+        <div class="logo-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+        </div>
+
+        <h1 class="fw-bold mb-1" style="font-size: 36px; letter-spacing: -0.5px; background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SnapSpend</h1>
+        <p class="text-secondary mb-4" style="font-size: 15px;">Smart Expense Tracking & AI Receipt Scanning</p>
+
+        <!-- Session-based Content -->
+        {% if session.get('user_id') %}
+            <div class="mb-4">
+                <div class="alert alert-dark border-0 py-2 px-3 d-inline-flex align-items-center gap-2 rounded-pill" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+                    <span class="d-inline-block bg-success rounded-circle" style="width: 8px; height: 8px; box-shadow: 0 0 8px #34d399;"></span>
+                    <span style="font-size: 13px; color: #cbd5e1;">Logged in as <strong style="color: #ffffff;">{{ session.get('user_name') }}</strong></span>
+                </div>
+            </div>
+
+            <!-- Features Navigation for Logged In Users -->
+            <div class="nav-links">
+                <a href="/add" class="feature-card">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="12" y2="12"></line>
+                    </svg>
+                    <strong>Add Expense</strong>
+                </a>
+                <a href="/expenses" class="feature-card">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <strong>View Expenses</strong>
+                </a>
+                <a href="/dashboard" class="feature-card">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <strong>Dashboard Analytics</strong>
+                </a>
+                <a href="/upload" class="feature-card">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <strong>Upload Receipt</strong>
+                </a>
+                <a href="/chat" class="feature-card" style="grid-column: 1 / -1; min-height: 80px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <strong>AI Expense Chatbot</strong>
+                </a>
+            </div>
+
+            <div class="mt-4">
+                <a href="/logout" class="btn btn-outline-danger px-4 py-2 rounded-pill mt-3 text-decoration-none" style="font-size: 14px; font-weight: 500;">Log Out</a>
+            </div>
+        {% else %}
+            <!-- Welcome View for Unauthenticated Users -->
+            <p class="text-secondary-emphasis mb-5" style="max-width: 460px; margin: 0 auto 30px; font-size: 14px; line-height: 1.6;">Log in or create a free account to track expenses, scan receipts using AI, and ask questions to your personal finance chatbot assistant.</p>
+            
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a href="/login" class="btn btn-gradient px-4 py-2.5 rounded-pill fs-6 fw-semibold text-decoration-none" style="width: 140px;">Log In</a>
+                <a href="/register" class="btn btn-outline-custom px-4 py-2.5 rounded-pill fs-6 fw-semibold text-decoration-none" style="width: 140px;">Sign Up</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Automatically dismiss the custom notification toast after 4 seconds -->
+    <script>
+        setTimeout(function() {
+            var toasts = document.querySelectorAll('.alert-custom');
+            toasts.forEach(function(toast) {
+                toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(function() {
+                    toast.remove();
+                }, 500);
+            });
+        }, 4000);
+    </script>
+</body>
+</html>
